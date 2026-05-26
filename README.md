@@ -144,4 +144,6 @@ Please seek immediate medical attention immediately.
 | 2026-05-26 11:05 AM | My father fainted suddenly | Neurological Emergency | High | Pending |
 | 2026-05-26 11:20 AM | Heavy bleeding after accident | Trauma Emergency | Critical | Pending |
 
-<img width="1570" height="707" alt="image" src="https://github.com/user-attachments/assets/07aa702b-f239-4d8a-94b2-4966ad05eb47" />
+## 📊 Google Sheets Emergency Tracker
+
+<img src="./google-sheet.PNG" width="1000"/>
