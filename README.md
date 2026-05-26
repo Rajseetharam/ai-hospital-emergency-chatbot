@@ -135,15 +135,22 @@ can not breath
 
 Please seek immediate medical attention immediately.
 
+
 ## 📊 Google Sheets Emergency Tracker
 
-| Timestamp | PatientMessage | EmergencyType | Severity | Status |
+| Timestamp | Patient Message | Emergency Type | Severity | Status |
 | --- | --- | --- | --- | --- |
-| 2026-05-26 10:30 AM | I have severe chest pain | Cardiac Emergency | Critical | Pending |
-| 2026-05-26 10:42 AM | can not breath | Respiratory Emergency | Critical | Pending |
-| 2026-05-26 11:05 AM | My father fainted suddenly | Neurological Emergency | High | Pending |
-| 2026-05-26 11:20 AM | Heavy bleeding after accident | Trauma Emergency | Critical | Pending |
-
-## 📊 Google Sheets Emergency Tracker
-
-<img src="./google-sheet.PNG" width="1000"/>
+| 2026-05-26T11:29:03.298-04:00 | severe chest pain | Cardiac Emergency | Critical | Pending |
+| 2026-05-26T11:36:20.375-04:00 | taking breath is difficult | Respiratory Emergency | Critical | Pending |
+| 2026-05-26T11:38:35.431-04:00 | suffering with heart pain | Cardiac Emergency | Critical | Pending |
+| 2026-05-26T11:41:50.659-04:00 | Met with Accident | Trauma Emergency | High | Pending |
+| 2026-05-26T11:42:29.866-04:00 | head injury | Trauma Emergency | High | Pending |
+| 2026-05-26T11:43:17.770-04:00 | chest pain | Cardiac Emergency | Critical | Pending |
+| 2026-05-26T11:43:58.727-04:00 | heavy bleeding | Bleeding Emergency | High | Pending |
+| 2026-05-26T11:44:36.300-04:00 | unconscious | Neurological Emergency | High | Pending |
+| 2026-05-26T11:45:47.235-04:00 | drug overdose | Poisoning Emergency | High | Pending |
+| 2026-05-26T11:46:35.313-04:00 | cannot breathe | Respiratory Emergency | Critical | Pending |
+| 2026-05-26T11:47:40.521-04:00 | chest pain | Cardiac Emergency | Critical | Pending |
+| 2026-05-26T11:52:32.558-04:00 | can not breathe | Respiratory Emergency | Critical | Pending |
+| 2026-05-26T11:54:42.060-04:00 | stroke i can not walk | Stroke Emergency | Critical | Pending |
+| 2026-05-26T12:00:45.073-04:00 | bleeding in brain | Neurological Emergency | High | Pending |
