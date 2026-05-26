@@ -4,6 +4,8 @@ An intelligent healthcare assistant built with n8n and OpenAI that provides pati
 
 ---
 
+Chat URL - http://localhost:5678/webhook/04ece82f-e9f6-4064-8de3-6bcb48f36f22/chat
+
 # **🏥 Overview**
 
 This project simulates a real-world hospital AI assistant that helps patients through a conversational chatbot interface.
@@ -98,6 +100,7 @@ Merge
       ↓
 Respond to Chat
 
+
 # **🛠️ Tech Stack**
 
 | **Technology** | **Purpose** |
@@ -107,6 +110,7 @@ Respond to Chat
 | **Google Sheets** | Emergency Tracking |
 | **JavaScript** | Emergency Detection Logic |
 | **Hosted Chat** | Patient Interface |
+
 
 # **📋 Example Scenarios**
 
@@ -134,6 +138,7 @@ can not breath
 🚨 Breathing difficulty may indicate a medical emergency.
 
 Please seek immediate medical attention immediately.
+
 
 
 ## 📊 Google Sheets Emergency Tracker
