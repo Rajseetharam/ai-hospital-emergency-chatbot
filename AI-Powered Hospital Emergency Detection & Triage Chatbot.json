@@ -1,0 +1,527 @@
+{
+  "name": "AI-Powered Hospital Emergency Detection & Triage Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const rawInput = $json.chatInput || $json.body?.userInput || \"\";\n\nconst input = rawInput\n  .toLowerCase()\n  .replace(/[^a-z0-9\\s]/g, \"\")\n  .replace(/\\s+/g, \" \")\n  .trim();\n\n// Emergency categories\nconst emergencyCategories = {\n  \"Cardiac Emergency\": [\n    \"chest pain\",\n    \"heart pain\",\n    \"heart attack\",\n    \"chest pressure\"\n  ],\n\n  \"Respiratory Emergency\": [\n    \"cant breathe\",\n    \"can not breathe\",\n    \"difficulty breathing\",\n    \"shortness of breath\",\n    \"breathless\",\n    \"hard to breathe\",\n    \"trouble breathing\",\n    \"taking breath is difficult\"\n  ],\n\n  \"Stroke Emergency\": [\n    \"stroke\",\n    \"face drooping\",\n    \"slurred speech\",\n    \"cannot speak\",\n    \"arm weakness\"\n  ],\n\n  \"Bleeding Emergency\": [\n    \"heavy bleeding\",\n    \"blood loss\",\n    \"bleeding badly\"\n  ],\n\n  \"Neurological Emergency\": [\n    \"seizure\",\n    \"unconscious\",\n    \"fainted\",\n    \"bleeding in brain\",\n    \"confusion\"\n  ],\n\n  \"Trauma Emergency\": [\n    \"accident\",\n    \"head injury\",\n    \"fracture\",\n    \"broken bone\"\n  ],\n\n  \"Allergic Emergency\": [\n    \"allergic reaction\",\n    \"swollen tongue\",\n    \"swollen face\",\n    \"anaphylaxis\"\n  ],\n\n  \"Poisoning Emergency\": [\n    \"poison\",\n    \"overdose\",\n    \"drug overdose\"\n  ],\n\n  \"Mental Health Crisis\": [\n    \"suicide\",\n    \"self harm\",\n    \"kill myself\"\n  ]\n};\n\n// Default values\nlet isEmergency = false;\nlet category = \"General\";\nlet severity = \"Low\";\n\n// Detection\nfor (const [cat, keywords] of Object.entries(emergencyCategories)) {\n  if (keywords.some(keyword => input.includes(keyword))) {\n    isEmergency = true;\n    category = cat;\n\n    // Severity logic\n    if (\n      cat === \"Cardiac Emergency\" ||\n      cat === \"Stroke Emergency\" ||\n      cat === \"Respiratory Emergency\"\n    ) {\n      severity = \"Critical\";\n    } else {\n      severity = \"High\";\n    }\n\n    break;\n  }\n}\n\n// Return\nreturn {\n  json: {\n    originalInput: rawInput,\n    normalizedInput: input,\n    isEmergency,\n    category,\n    severity,\n    Timestamp: new Date().toISOString(),\n    PatientMessage: rawInput,\n    EmergencyType: category,\n    Severity: severity,\n    Status: \"Pending\"\n  }\n};"
+      },
+      "id": "60dc89ed-72af-4392-8856-2bc178cefc1f",
+      "name": "Safety Check & Categorization",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -400,
+        96
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c5528e99-6c2d-469e-aec6-ad5b07d5c8f1",
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.isEmergency }}",
+              "rightValue": true
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true,
+          "looseTypeValidation": true
+        }
+      },
+      "id": "0041ba86-c3e6-44be-8d98-306015c94e26",
+      "name": "Emergency Router",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -208,
+        96
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "emergency",
+              "name": "response",
+              "type": "string",
+              "value": "=🚨 EMERGENCY DETECTED 🚨\n\n**CALL EMERGENCY SERVICES IMMEDIATELY:**\n\n🇺🇸 USA: 911\n🇬🇧 UK: 999\n🇪🇺 EU: 112\n🇦🇺 Australia: 000\n\n**Your message suggests a medical emergency.**\n\nWhile waiting for help:\n1. Stay calm\n2. Don't drive yourself\n3. Unlock doors for paramedics\n4. Have medications list ready\n5. Call someone to be with you\n\n**This is an automated response. Get immediate medical help!**"
+            },
+            {
+              "id": "type",
+              "name": "responseType",
+              "type": "string",
+              "value": "emergency"
+            },
+            {
+              "id": "severity",
+              "name": "severity",
+              "type": "string",
+              "value": "critical"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2a7d18ed-0fea-4ca5-b4ef-d830a6f6c5ff",
+      "name": "Emergency Response",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        352,
+        16
+      ],
+      "typeVersion": 3.4,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5.2",
+          "mode": "list",
+          "cachedResultName": "GPT-5.2"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a hospital AI assistant chatbot.\n\nProvide concise, patient-friendly health guidance.\n\nRules:\n- Keep responses short and practical.\n- Use simple language.\n- Avoid long explanations.\n- Avoid educational essays.\n- Avoid excessive disclaimers.\n- Do not use bullet points unless necessary.\n- Answer naturally like a hospital support assistant.\n- If symptoms indicate emergency, respond briefly and advise immediate medical attention.\n\nUser Question:\n{{ $json.chatInput }}",
+              "role": "system"
+            },
+            {
+              "content": "={{ $('When chat message received').item.json.chatInput }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 1000,
+          "temperature": 0.3
+        }
+      },
+      "id": "75d5f44b-de77-494a-ad24-677038a9bcdd",
+      "name": "Health Information AI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        -32,
+        224
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "L0UUxwqX8zB4AZW0",
+          "name": "OpenAI account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c5528e99-6c2d-469e-aec6-ad5b07d5c8f1",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.error === undefined }}",
+              "rightValue": true
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6a40719b-7679-4e7c-86e0-eef4968742f9",
+      "name": "Check AI Success",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        256,
+        192
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "error_response",
+              "name": "response",
+              "type": "string",
+              "value": "=An unexpected error occurred while processing your health query. Please try again later or consult a healthcare professional directly. We apologize for the inconvenience."
+            },
+            {
+              "id": "error_type",
+              "name": "responseType",
+              "type": "string",
+              "value": "error"
+            },
+            {
+              "id": "error_severity",
+              "name": "severity",
+              "type": "string",
+              "value": "high"
+            },
+            {
+              "id": "error_disclaimer",
+              "name": "disclaimer",
+              "type": "string",
+              "value": "=⚕️ **Important Medical Disclaimer:**\nThis information is for educational purposes only and is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition."
+            },
+            {
+              "id": "error_resources",
+              "name": "resources",
+              "type": "string",
+              "value": "=📞 **Health Resources:**\n• Find a doctor: https://doctor.webmd.com/\n• Symptom checker: https://www.mayoclinic.org/symptom-checker/\n• Mental health: https://www.samhsa.gov/find-help/national-helpline\n• Poison control: 1-800-222-1222 (US)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e0743c1c-c052-4ea4-a7f1-41dbd006adf8",
+      "name": "AI Error Handler",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -96,
+        416
+      ],
+      "typeVersion": 3.4,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3d0292bc-0e07-4b55-9b7f-be0b417c2e05",
+              "name": "response",
+              "type": "string",
+              "value": "={{ $json.message.content }}"
+            },
+            {
+              "id": "e4e66a7a-1776-465b-865f-76666c5e3584",
+              "name": "responseType",
+              "type": "string",
+              "value": "={{ $('Safety Check & Categorization').item.json.queryType }}"
+            },
+            {
+              "id": "b2346867-40bb-4321-a3bd-59b948036dca",
+              "name": "disclaimer",
+              "type": "string",
+              "value": "=This information is for general guidance only and is not a medical diagnosis. Please consult a healthcare professional for personalized medical advice."
+            },
+            {
+              "id": "8f30e7de-3dcb-412f-bcd8-d8bbfff087fb",
+              "name": "resources",
+              "type": "string",
+              "value": "=📞 **Health Resources:**\n• Find a doctor: https://doctor.webmd.com/\n• Symptom checker: https://www.mayoclinic.org/symptom-checker/\n• Mental health: https://www.samhsa.gov/find-help/national-helpline\n• Poison control: 1-800-222-1222 (US)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fb4c860f-cb78-4db9-ba09-128c2de570ec",
+      "name": "Format Health Response",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        464,
+        192
+      ],
+      "typeVersion": 3.4,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "id": "dec574a2-039f-4dd7-9ec1-868720702651",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        608,
+        96
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "public": true,
+        "options": {
+          "responseMode": "responseNodes"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -656,
+        96
+      ],
+      "id": "89f97183-bfdc-46c2-9c80-84b5e44c24b8",
+      "name": "When chat message received",
+      "webhookId": "04ece82f-e9f6-4064-8de3-6bcb48f36f22"
+    },
+    {
+      "parameters": {
+        "message": "={{ $json.response }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1.3,
+      "position": [
+        816,
+        96
+      ],
+      "id": "68e6585b-5da7-4116-9e46-52f664049a1c",
+      "name": "Repond to chat ",
+      "webhookId": "cc73e170-449a-4037-9ab7-3d39e10ab27a"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1JiQJYQC3DJFLBAC0Olm8I9R0G2WwPQlcmHRDMGxEriI",
+          "mode": "list",
+          "cachedResultName": "Emergency_Patients",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JiQJYQC3DJFLBAC0Olm8I9R0G2WwPQlcmHRDMGxEriI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Patient Message": "={{ $('Safety Check & Categorization').item.json.originalInput }}",
+            "Emergency Type": "={{ $('Safety Check & Categorization').item.json.category }}",
+            "Severity": "={{ $('Safety Check & Categorization').item.json.severity }}",
+            "Status": "Pending"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Patient Message",
+              "displayName": "Patient Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Emergency Type",
+              "displayName": "Emergency Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Severity",
+              "displayName": "Severity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "locationDefine": {
+            "values": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        80,
+        32
+      ],
+      "id": "c960d22c-1ef6-4149-a2bf-e9aadce6dbb2",
+      "name": "Emergency Patients records",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "OYisOAQkGuMTsY47",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Repond to chat ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check AI Success": {
+      "main": [
+        [
+          {
+            "node": "Format Health Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Emergency Router": {
+      "main": [
+        [
+          {
+            "node": "Emergency Patients records",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Health Information AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Emergency Response": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Health Information AI": {
+      "main": [
+        [
+          {
+            "node": "Check AI Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Health Response": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Safety Check & Categorization": {
+      "main": [
+        [
+          {
+            "node": "Emergency Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Safety Check & Categorization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Emergency Patients records": {
+      "main": [
+        [
+          {
+            "node": "Emergency Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "830bf8ef-d2fb-4bfc-b39d-ad9dba31d99e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "466d0a137a48cb40a7397d8ddc73a4cfbe19d40b597286f183c1a5759a6abeb2"
+  },
+  "id": "CXR8uPg9UJmjQJoH",
+  "tags": []
+}
